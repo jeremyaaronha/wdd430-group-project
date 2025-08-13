@@ -1,3 +1,4 @@
+// src/app/api/artists/[name]/route.ts
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
@@ -5,16 +6,10 @@ export async function GET(
   _req: Request,
   { params }: { params: { name: string } }
 ) {
-  const name = decodeURIComponent(params.name);
-
   try {
-    const r = await sql<{
-      artist_name: string;
-      artist_description: string | null;
-      image_url: string | null;
-      artist_id: number;
-      product_count: string; 
-    }>`
+    const name = decodeURIComponent(params.name);
+
+    const r = await sql`
       SELECT
         a.name AS artist_name,
         COALESCE(u.description, a.artist_description) AS artist_description,
@@ -33,11 +28,19 @@ export async function GET(
       return NextResponse.json({ error: 'Artist not found' }, { status: 404 });
     }
 
-    const row = r.rows[0];
+    const row = r.rows[0] as {
+      artist_name: string;
+      artist_description: string | null;
+      image_url: string | null;
+      artist_id: number;
+      product_count: string | number;
+    };
+
     return NextResponse.json({
       artist_name: row.artist_name,
       artist_description: row.artist_description ?? '',
       image_url: row.image_url,
+      artist_id: row.artist_id,
       product_count: Number(row.product_count),
     });
   } catch (e) {
