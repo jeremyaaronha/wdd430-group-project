@@ -1,10 +1,11 @@
+// src/app/api/user/[email]/route.ts
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
-export async function GET(
-  _req: Request,
-  { params }: { params: { email: string } }
-) {
+type Ctx = { params: { email: string } };
+
+export async function GET(_req: Request, ctx: unknown) {
+  const { params } = ctx as Ctx;
   try {
     const email = decodeURIComponent(params.email);
     const r = await sql`
