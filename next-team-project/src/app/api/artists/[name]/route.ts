@@ -1,11 +1,6 @@
-// src/app/api/artists/[name]/route.ts
-import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { NextResponse } from 'next/server';import { sql } from '@vercel/postgres';
 
-export async function GET(
-  _req: Request,
-  { params }: { params: { name: string } }
-) {
+export async function GET(_req: Request, { params }: any) {
   try {
     const name = decodeURIComponent(params.name);
 
