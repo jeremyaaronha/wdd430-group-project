@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductCard from '../components/productCard';
 
@@ -14,6 +15,14 @@ interface Product {
 }
 
 export default function ArtworkPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ArtworkPageContent />
+    </Suspense>
+  );
+}
+
+function ArtworkPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const page = parseInt(searchParams.get('page') || '1');
@@ -27,10 +36,11 @@ export default function ArtworkPage() {
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState(initialCategory);
 
-  // get products api
   useEffect(() => {
     const fetchProducts = async () => {
-      const res = await fetch(`/api/products?page=${page}&sort=${sort}&search=${search}&category=${category}`);
+      const res = await fetch(
+        `/api/products?page=${page}&sort=${sort}&search=${search}&category=${category}`
+      );
       const data = await res.json();
       setProducts(data.products);
       setTotalPages(data.totalPages);
@@ -38,25 +48,21 @@ export default function ArtworkPage() {
     fetchProducts();
   }, [page, sort, search, category]);
 
-  // page
   const handlePageChange = (newPage: number) => {
     router.push(`?page=${newPage}&sort=${sort}&search=${search}&category=${category}`);
   };
 
-  // sort
   const handleSortChange = (newSort: string) => {
     setSort(newSort);
     router.push(`?page=1&sort=${newSort}&search=${search}&category=${category}`);
   };
 
-  // search
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
     router.push(`?page=1&sort=${sort}&search=${value}&category=${category}`);
   };
 
-  // category
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setCategory(value);
@@ -67,9 +73,7 @@ export default function ArtworkPage() {
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-4">Artisans Products</h1>
 
-      {/* search - filters */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        {/* search */}
         <input
           type="text"
           value={search}
@@ -78,9 +82,7 @@ export default function ArtworkPage() {
           className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black w-full sm:w-1/3"
         />
 
-        {/* filters */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* sort by price */}
           <button
             onClick={() => handleSortChange(sort === 'asc' ? 'desc' : 'asc')}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-100 hover:shadow-md transition"
@@ -102,7 +104,6 @@ export default function ArtworkPage() {
             Price: {sort === 'asc' ? 'Low to High' : 'High to Low'}
           </button>
 
-          {/* category filter */}
           <select
             value={category}
             onChange={handleCategoryChange}
@@ -122,14 +123,12 @@ export default function ArtworkPage() {
         </div>
       </div>
 
-      {/* product list */}
-      <div className="grid gap-6 sm:gap-8 md:gap-10 grid-cols-[repeat(auto-fit,_minmax(200px,_1fr))]">          
+      <div className="grid gap-6 sm:gap-8 md:gap-10 grid-cols-[repeat(auto-fit,_minmax(200px,_1fr))]">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
 
-      {/* pagination */}
       <div className="flex justify-center mt-8 gap-2">
         {[...Array(totalPages)].map((_, i) => {
           const pageNum = i + 1;
