@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
-export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
-) {
+type Ctx = { params: { id: string } };
+
+export async function GET(_req: Request, ctx: unknown) {
+  const { params } = ctx as Ctx;
   const productId = Number(params.id);
   if (!Number.isFinite(productId)) {
     return NextResponse.json({ error: 'Invalid product id' }, { status: 400 });
@@ -24,10 +24,8 @@ export async function GET(
   }
 }
 
-export async function POST(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: Request, ctx: unknown) {
+  const { params } = ctx as Ctx;
   const productId = Number(params.id);
   if (!Number.isFinite(productId)) {
     return NextResponse.json({ error: 'Invalid product id' }, { status: 400 });
@@ -62,4 +60,3 @@ export async function POST(
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
-
