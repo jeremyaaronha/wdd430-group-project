@@ -1,10 +1,22 @@
-import { NextResponse } from 'next/server';import { sql } from '@vercel/postgres';
+import { NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
 
-export async function GET(_req: Request, { params }: any) {
+// tipo local para el contexto de params
+type Ctx = { params: { name: string } };
+
+export async function GET(_req: Request, ctx: unknown) {
+  // casteamos de forma segura sin usar `any`
+  const { params } = ctx as Ctx;
+  const name = decodeURIComponent(params.name);
+
   try {
-    const name = decodeURIComponent(params.name);
-
-    const r = await sql`
+    const r = await sql<{
+      artist_name: string;
+      artist_description: string | null;
+      image_url: string | null;
+      artist_id: number;
+      product_count: string | number;
+    }>`
       SELECT
         a.name AS artist_name,
         COALESCE(u.description, a.artist_description) AS artist_description,
@@ -23,14 +35,7 @@ export async function GET(_req: Request, { params }: any) {
       return NextResponse.json({ error: 'Artist not found' }, { status: 404 });
     }
 
-    const row = r.rows[0] as {
-      artist_name: string;
-      artist_description: string | null;
-      image_url: string | null;
-      artist_id: number;
-      product_count: string | number;
-    };
-
+    const row = r.rows[0];
     return NextResponse.json({
       artist_name: row.artist_name,
       artist_description: row.artist_description ?? '',
