@@ -9,6 +9,15 @@
   --card: rgba(255, 255, 255, 0.9);
 }
 
+:root {
+  --background: #ffffff;
+  --foreground: #212529;
+  --muted: #6c757d;
+
+  --accent: #c1694f;
+  --accent-hover: #a35640;
+}
+
 /* html,
 body {
   background: var(--background);
